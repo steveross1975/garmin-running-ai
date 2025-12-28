@@ -1,4 +1,4 @@
-.venv/
+.running_ai/
 .env
 __pycache__/
 *.pvc
