@@ -1,0 +1,66 @@
+🚀 Running Form Analyzer
+================================================================================
+✅ Loaded 3 activities
+✅ Loaded running profile with 15 metrics
+
+================================================================================
+📊 RUNNING FORM ANALYSIS REPORT
+================================================================================
+
+🎯 OVERALL FORM SCORE: 92.6/100 🌟 EXCELLENT
+   Based on 3 activities
+
+📋 DETAILED METRICS
+--------------------------------------------------------------------------------
+
+  CADENCE: 76.1/100 ✅ Good
+    Current: 165.67
+    Target: 165-180
+    → Steps per minute
+
+  VERTICAL_OSCILLATION: 92.0/100 ✅ Good
+    Current: 8.47
+    Target: 7-8
+    → Vertical bounce (cm) - lower is better
+
+  VERTICAL_RATIO: 90.0/100 ✅ Good
+    Current: 8.33
+    Target: 7-8.5
+    → Vertical movement ratio (%) - lower is better
+
+  GROUND_CONTACT_TIME: 99.4/100 ⭐ Elite
+    Current: 269.33
+    Target: 240-270
+    → Ground contact time (ms) - shorter is better
+
+  STEP_SPEED_LOSS: 96.8/100 ⭐ Elite
+    Current: 7.57
+    Target: 4-6
+    → Step speed loss (%) - lower is better
+
+  HR_EFFICIENCY: 93.3/100 ✅ Good
+    Current: 82.78
+    Target: 75-90
+    → HR as % of max (lower = more efficient)
+
+✅ STRENGTHS (5)
+--------------------------------------------------------------------------------
+  ⭐ Vertical Oscillation: 92.0/100 (value: 8.47)
+  ⭐ Vertical Ratio: 90.0/100 (value: 8.33)
+  ⭐ Ground Contact Time: 99.4/100 (value: 269.33)
+  ⭐ Step Speed Loss: 96.8/100 (value: 7.57)
+  ⭐ Hr Efficiency: 93.3/100 (value: 82.78)
+
+💡 TRAINING RECOMMENDATIONS
+--------------------------------------------------------------------------------
+  1. Reduce SSL with hill repeats and lower-body strength training
+
+📅 NEXT 4 WEEKS
+--------------------------------------------------------------------------------
+  Week 1-2: Focus on top priority (usually cadence or step speed loss)
+  Week 3-4: Add secondary focus with strength training
+  Each week: Track metrics to monitor improvement
+
+================================================================================
+
+💾 Analysis saved: /home/steveross1975/Documenti/garmin_running_ai/data/form_analysis.json

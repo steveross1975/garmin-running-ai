@@ -1,9 +1,9 @@
 """Form Analyzer - Score your running form against benchmarks."""
 import json
 
+import numpy as np
 import pandas as pd
-
-from .config import DATA_DIR
+from config import DATA_DIR, is_pipeline_mode
 
 ACTIVITIES_CSV = DATA_DIR / "Activities.csv"
 RUNNING_PROFILE = DATA_DIR / "running_profile.json"
@@ -270,6 +270,14 @@ def print_report(analysis: dict) -> None:
     
     print("\n" + "=" * 80 + "\n")
 
+def make_json_serializable(obj):
+    if isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float64, np.float32)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
 
 if __name__ == "__main__":
     """Run form analyzer."""
@@ -293,6 +301,7 @@ if __name__ == "__main__":
     
     # Save results
     output_file = DATA_DIR / "form_analysis.json"
+    serializable_analysis = {k: make_json_serializable(v) for k, v in analysis.items()}
     with open(output_file, 'w') as f:
-        json.dump(analysis, f, indent=2)
+        json.dump(serializable_analysis, f, indent=2)
     print(f"💾 Analysis saved: {output_file}")

@@ -1,0 +1,158 @@
+{
+  "timestamp": "2025-12-29T22:18:40.183157",
+  "num_activities": 3,
+  "metrics": {
+    "cadence": {
+      "value": 165.67,
+      "score": 76.1,
+      "benchmark": {
+        "elite": {
+          "min": 180,
+          "max": 200
+        },
+        "good": {
+          "min": 165,
+          "max": 180
+        },
+        "target": {
+          "min": 165,
+          "max": 180
+        },
+        "description": "Steps per minute"
+      },
+      "status": "\u2705 Good"
+    },
+    "vertical_oscillation": {
+      "value": 8.47,
+      "score": 92.0,
+      "benchmark": {
+        "elite": {
+          "min": 0,
+          "max": 7
+        },
+        "good": {
+          "min": 7,
+          "max": 9
+        },
+        "target": {
+          "min": 7,
+          "max": 8
+        },
+        "description": "Vertical bounce (cm) - lower is better"
+      },
+      "status": "\u2705 Good"
+    },
+    "vertical_ratio": {
+      "value": 8.33,
+      "score": 90.0,
+      "benchmark": {
+        "elite": {
+          "min": 0,
+          "max": 7
+        },
+        "good": {
+          "min": 7,
+          "max": 9
+        },
+        "target": {
+          "min": 7,
+          "max": 8.5
+        },
+        "description": "Vertical movement ratio (%) - lower is better"
+      },
+      "status": "\u2705 Good"
+    },
+    "ground_contact_time": {
+      "value": 269.33,
+      "score": 99.4,
+      "benchmark": {
+        "elite": {
+          "min": 200,
+          "max": 240
+        },
+        "good": {
+          "min": 240,
+          "max": 280
+        },
+        "target": {
+          "min": 240,
+          "max": 270
+        },
+        "description": "Ground contact time (ms) - shorter is better"
+      },
+      "status": "\u2b50 Elite"
+    },
+    "step_speed_loss": {
+      "value": 7.57,
+      "score": 96.8,
+      "benchmark": {
+        "elite": {
+          "min": 0,
+          "max": 4
+        },
+        "good": {
+          "min": 4,
+          "max": 8
+        },
+        "target": {
+          "min": 4,
+          "max": 6
+        },
+        "description": "Step speed loss (%) - lower is better"
+      },
+      "status": "\u2b50 Elite"
+    },
+    "hr_efficiency": {
+      "value": 82.78,
+      "score": 93.3,
+      "benchmark": {
+        "elite": {
+          "min": 85,
+          "max": 100
+        },
+        "good": {
+          "min": 75,
+          "max": 85
+        },
+        "target": {
+          "min": 75,
+          "max": 90
+        },
+        "description": "HR as % of max (lower = more efficient)"
+      },
+      "status": "\u2705 Good"
+    }
+  },
+  "overall_score": 92.6,
+  "strengths": [
+    {
+      "metric": "Vertical Oscillation",
+      "score": 92.0,
+      "value": 8.47
+    },
+    {
+      "metric": "Vertical Ratio",
+      "score": 90.0,
+      "value": 8.33
+    },
+    {
+      "metric": "Ground Contact Time",
+      "score": 99.4,
+      "value": 269.33
+    },
+    {
+      "metric": "Step Speed Loss",
+      "score": 96.8,
+      "value": 7.57
+    },
+    {
+      "metric": "Hr Efficiency",
+      "score": 93.3,
+      "value": 82.78
+    }
+  ],
+  "improvement_areas": [],
+  "recommendations": [
+    "Reduce SSL with hill repeats and lower-body strength training"
+  ]
+}

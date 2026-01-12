@@ -1,0 +1,10 @@
+{
+  "feature_columns": [
+    "cadencespm",
+    "verticaloscillationcm",
+    "groundcontacttimems",
+    "stepspeedlosspct",
+    "heartratebpm",
+    "paceminkm"
+  ]
+}

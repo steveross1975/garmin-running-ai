@@ -4,8 +4,7 @@ from pathlib import Path
 from typing import List
 
 import fitparse
-
-from .config import FIT_DIR
+from config import FIT_DIR, is_pipeline_mode
 
 
 def unzip_garmin_exports() -> List[Path]:
@@ -91,6 +90,9 @@ def get_recent_fit_files(n_recent: int = 5, by_modified: bool = True) -> List[Pa
 
 if __name__ == "__main__":
     """Test local FIT handler with ZIP support."""
+    if is_pipeline_mode():
+        print("🚫 Use pipeline.py instead")
+    exit(1)
     print("🚀 Garmin Running AI - Local FIT Handler (ZIP + FIT)")
     print("=" * 50)
     

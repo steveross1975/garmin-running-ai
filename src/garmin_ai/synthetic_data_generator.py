@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 # from pathlib import Path
-from .config import DATA_DIR
+from config import DATA_DIR, is_pipeline_mode
 
 SYNTHETIC_DIR = DATA_DIR / "synthetic"
 SYNTHETIC_DIR.mkdir(exist_ok=True)

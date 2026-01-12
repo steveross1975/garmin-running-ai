@@ -1,13 +1,12 @@
 """Analyze Garmin Activities.csv - comprehensive running metrics."""
+import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
-from .config import DATA_DIR
+from config import DATA_DIR
 
 ACTIVITIES_CSV = DATA_DIR / "Activities.csv"
-
 
 def load_activities(csv_path: Path = ACTIVITIES_CSV) -> pd.DataFrame:
     """Load Garmin Activities.csv with all running metrics."""
@@ -23,17 +22,15 @@ def load_activities(csv_path: Path = ACTIVITIES_CSV) -> pd.DataFrame:
     
     return df
 
-
 def parse_time_to_seconds(time_str: str) -> float:
     """Convert HH:MM:SS to seconds."""
     try:
         parts = str(time_str).split(':')
         if len(parts) == 3:
             return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-        return 0
+        return 0.0
     except Exception:
-        return 0
-
+        return 0.0
 
 def parse_gct_balance(balance_str: str) -> tuple:
     """Parse GCT Balance like '50.1% L / 49.9% R' to (left%, right%)."""
@@ -41,13 +38,24 @@ def parse_gct_balance(balance_str: str) -> tuple:
         parts = str(balance_str).replace('%', '').split('/')
         left = float(parts[0].strip().replace('L', ''))
         right = float(parts[1].strip().replace('R', ''))
-        return (left, right)
+        return (float(left), float(right))
     except Exception:
-        return (50, 50)
+        return (50.0, 50.0)
 
+def to_python_native(value):
+    """Convert numpy/pandas types to Python native types."""
+    if pd.isna(value):
+        return 0.0
+    if isinstance(value, (np.integer, np.int64, np.int32)):
+        return int(value)
+    if isinstance(value, (np.floating, np.float64, np.float32)):
+        return float(value)
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    return value
 
 def analyze_activities(df: pd.DataFrame) -> dict:
-    """Comprehensive analysis of all running activities."""
+    """Comprehensive analysis of all running activities - JSON SAFE."""
     if df.empty:
         return {}
     
@@ -63,67 +71,79 @@ def analyze_activities(df: pd.DataFrame) -> dict:
         lambda x: pd.Series(parse_gct_balance(x))
     )
     
+    # Convert ALL pandas series to Python floats FIRST
+    def safe_mean(series):
+        return float(series.mean()) if not series.empty else 0.0
+    
+    def safe_sum(series):
+        return float(series.sum()) if not series.empty else 0.0
+    
+    def safe_max(series):
+        return float(series.max()) if not series.empty else 0.0
+    
+    def safe_min(series):
+        return float(series.min()) if not series.empty else 0.0
+    
     analysis = {
-        "num_activities": len(df),
-        "total_distance_km": df['Distance'].sum(),
-        "total_time_hours": df_clean['Time_Seconds'].sum() / 3600,
+        "num_activities": int(len(df)),
+        "total_distance_km": safe_sum(df['Distance']),
+        "total_time_hours": safe_sum(df_clean['Time_Seconds']) / 3600,
         
         # Running Cadence
-        "avg_cadence": df['Avg Run Cadence'].mean(),
-        "max_cadence": df['Max Run Cadence'].max(),
-        "min_cadence": df['Avg Run Cadence'].min(),
-        "cadence_range": df['Max Run Cadence'].max() - df['Avg Run Cadence'].min(),
+        "avg_cadence": safe_mean(df['Avg Run Cadence']),
+        "max_cadence": safe_max(df['Max Run Cadence']),
+        "min_cadence": safe_min(df['Avg Run Cadence']),
+        "cadence_range": safe_max(df['Max Run Cadence']) - safe_min(df['Avg Run Cadence']),
         
         # Heart Rate
-        "avg_hr": df['Avg HR'].mean(),
-        "max_hr": df['Max HR'].max(),
-        "min_hr": df['Avg HR'].min(),
-        "hr_zone_efficiency": df['Avg HR'].mean() / df['Max HR'].max() * 100,  # % of max
+        "avg_hr": safe_mean(df['Avg HR']),
+        "max_hr": safe_max(df['Max HR']),
+        "min_hr": safe_min(df['Avg HR']),
+        "hr_zone_efficiency": safe_mean(df['Avg HR']) / safe_max(df['Max HR']) * 100 if safe_max(df['Max HR']) > 0 else 0.0,
         
         # Running Dynamics
-        "avg_vertical_oscillation": df['Avg Vertical Oscillation'].mean(),
-        "avg_vertical_ratio": df['Avg Vertical Ratio'].mean(),
-        "avg_ground_contact_time": df['Avg Ground Contact Time'].mean(),
-        "avg_step_speed_loss_cms": df['Avg Step Speed Loss'].mean(),
-        "avg_step_speed_loss_pct": df['Avg Step Speed Loss %'].mean(),
-        "avg_stride_length": df['Avg Stride Length'].mean(),
+        "avg_vertical_oscillation": safe_mean(df['Avg Vertical Oscillation']),
+        "avg_vertical_ratio": safe_mean(df['Avg Vertical Ratio']),
+        "avg_ground_contact_time": safe_mean(df['Avg Ground Contact Time']),
+        "avg_step_speed_loss_cms": safe_mean(df['Avg Step Speed Loss']),
+        "avg_step_speed_loss_pct": safe_mean(df['Avg Step Speed Loss %']),
+        "avg_stride_length": safe_mean(df['Avg Stride Length']),
         
         # GCT Balance (left/right)
-        "avg_gct_balance_left": df_clean['GCT_Balance_Left'].mean(),
-        "avg_gct_balance_right": df_clean['GCT_Balance_Right'].mean(),
+        "avg_gct_balance_left": safe_mean(df_clean['GCT_Balance_Left']),
+        "avg_gct_balance_right": safe_mean(df_clean['GCT_Balance_Right']),
         
         # Pace & Power
-        "avg_pace_min_km": df['Avg Pace'].astype(str).str.split(':').apply(
-            lambda x: int(x[0]) * 60 + int(x[1]) if len(x) == 2 else 0
-        ).mean() / 60,
-        "avg_power": df['Avg Power'].mean(),
+        "avg_pace_min_km": safe_mean(df['Avg Pace'].astype(str).str.split(':').apply(
+            lambda x: (int(x[0]) * 60 + int(x[1])) / 60 if len(x) == 2 else 0.0
+        )),
+        "avg_power": safe_mean(df['Avg Power']),
         
         # Training Metrics
-        "total_aerobic_te": df['Aerobic TE'].sum(),
-        "avg_aerobic_te": df['Aerobic TE'].mean(),
-        "total_calories": df['Calories'].sum(),
+        "total_aerobic_te": safe_sum(df['Aerobic TE']),
+        "avg_aerobic_te": safe_mean(df['Aerobic TE']),
+        "total_calories": safe_sum(df['Calories']),
         
         # Activity Details
         "activities": []
     }
     
-    # Per-activity details
+    # Per-activity details - ALL Python native
     for idx, row in df.iterrows():
         activity = {
-            "date": row['Date'],
-            "distance": row['Distance'],
-            "time": row['Time'],
-            "avg_hr": row['Avg HR'],
-            "cadence": row['Avg Run Cadence'],
-            "vertical_osc": row['Avg Vertical Oscillation'],
-            "gct": row['Avg Ground Contact Time'],
-            "step_loss": row['Avg Step Speed Loss'],
-            "aerobic_te": row['Aerobic TE'],
+            "date": str(row['Date']),
+            "distance": float(row['Distance']),
+            "time": str(row['Time']),
+            "avg_hr": float(row['Avg HR']),
+            "cadence": float(row['Avg Run Cadence']),
+            "vertical_osc": float(row['Avg Vertical Oscillation']),
+            "gct": float(row['Avg Ground Contact Time']),
+            "step_loss": float(row['Avg Step Speed Loss']),
+            "aerobic_te": float(row['Aerobic TE']),
         }
         analysis["activities"].append(activity)
     
     return analysis
-
 
 def print_analysis(analysis: dict) -> None:
     """Pretty print activity analysis."""
@@ -172,6 +192,36 @@ def print_analysis(analysis: dict) -> None:
         print(f"     {act['distance']:.1f}km | {act['time']} | HR {act['avg_hr']:.0f} | Cadence {act['cadence']:.0f}")
         print(f"     VO: {act['vertical_osc']:.1f}cm | GCT: {act['gct']:.0f}ms | SSL: {act['step_loss']:.1f}cm/s")
 
+def create_running_profile(analysis):
+    """Create running profile JSON from analysis dict - already Python native."""
+    return {
+        'avg_cadence': float(analysis.get('avg_cadence', 0)),
+        'avg_hr': float(analysis.get('avg_hr', 0)),
+        'max_hr': float(analysis.get('max_hr', 0)),
+        'avg_vertical_oscillation': float(analysis.get('avg_vertical_oscillation', 0)),
+        'avg_vertical_ratio': float(analysis.get('avg_vertical_ratio', 0)),
+        'avg_ground_contact_time': float(analysis.get('avg_ground_contact_time', 0)),
+        'avg_step_speed_loss': float(analysis.get('avg_step_speed_loss_cms', 0)),
+        'avg_step_speed_loss_pct': float(analysis.get('avg_step_speed_loss_pct', 0)),
+        'avg_stride_length': float(analysis.get('avg_stride_length', 0)),
+        'avg_gct_balance_left': float(analysis.get('avg_gct_balance_left', 50)),
+        'avg_gct_balance_right': float(analysis.get('avg_gct_balance_right', 50)),
+        'avg_pace_min_km': float(analysis.get('avg_pace_min_km', 0)),
+        'avg_power': float(analysis.get('avg_power', 0)),
+        'total_aerobic_te': float(analysis.get('total_aerobic_te', 0)),
+        'avg_aerobic_te': float(analysis.get('avg_aerobic_te', 0)),
+    }
+
+def save_running_profile(profile, path=None):
+    """Save running profile - simplified (data already JSON safe)."""
+    if path is None:
+        path = DATA_DIR / 'running_profile.json'
+    
+    with open(path, 'w') as f:
+        json.dump(profile, f, indent=2)
+    
+    print(f"✅ Saved {path}")
+    return path
 
 if __name__ == "__main__":
     """Analyze your Garmin Activities.csv."""
@@ -186,22 +236,14 @@ if __name__ == "__main__":
     
     analysis = analyze_activities(df)
     print_analysis(analysis)
-    
-    # Save analysis to JSON for later
-    import json
-    analysis_file = DATA_DIR / "running_profile.json"
-    
-    # Convert numpy types to native Python types for JSON serialization
-    json_analysis = {}
-    for k, v in analysis.items():
-        if k != 'activities':
-            # Convert numpy types to Python native types
-            if isinstance(v, (np.integer, np.floating)):
-                json_analysis[k] = float(v)
-            else:
-                json_analysis[k] = v
-    
-    with open(analysis_file, 'w') as f:
-        json.dump(json_analysis, f, indent=2)
-    
-    print(f"\n💾 Profile saved: {analysis_file}")
+    running_profile = create_running_profile(analysis)
+    print("🔍 DEBUG: running_profile types =", {k: type(v).__name__ for k, v in running_profile.items()})
+    print("🔍 DEBUG: sample values =", list(running_profile.items())[:3])
+    try:
+        test_json = json.dumps(running_profile)
+        print("✅ JSON serializable OK!")
+    except Exception as e:
+        print(f"❌ JSON ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+    save_running_profile(running_profile)

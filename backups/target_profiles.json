@@ -1,0 +1,155 @@
+{
+  "steady_runner": {
+    "name": "Steady Runner",
+    "description": "Conservative, focus on endurance and consistency",
+    "archetype": "Marathon-focused, injury-preventive approach",
+    "metrics": {
+      "cadence_spm": {
+        "min": 155,
+        "max": 165,
+        "ideal": 160,
+        "description": "Lower cadence, longer stride"
+      },
+      "vertical_oscillation_cm": {
+        "min": 7.0,
+        "max": 8.0,
+        "ideal": 7.5,
+        "description": "Good bounce control"
+      },
+      "vertical_ratio": {
+        "min": 7.0,
+        "max": 8.0,
+        "ideal": 7.5,
+        "description": "Efficient vertical movement"
+      },
+      "ground_contact_time_ms": {
+        "min": 250,
+        "max": 260,
+        "ideal": 255,
+        "description": "Moderate contact time"
+      },
+      "step_speed_loss_percent": {
+        "min": 5.0,
+        "max": 6.0,
+        "ideal": 5.5,
+        "description": "Low energy loss per step"
+      },
+      "hr_efficiency": {
+        "min": 75,
+        "max": 85,
+        "ideal": 80,
+        "description": "Conservative HR zones"
+      }
+    },
+    "training_focus": [
+      "Long, steady runs (60-90 min)",
+      "Easy recovery runs",
+      "Occasional tempo runs (20-30 min)",
+      "Strength: 1x/week (maintenance)"
+    ],
+    "target_pace_min_km": 5.45,
+    "target_max_hr": 170
+  },
+  "efficient_runner": {
+    "name": "Efficient Runner",
+    "description": "Optimized form, focus on running economy",
+    "archetype": "Speed-focused, biomechanically efficient",
+    "metrics": {
+      "cadence_spm": {
+        "min": 170,
+        "max": 180,
+        "ideal": 175,
+        "description": "Higher cadence, shorter stride"
+      },
+      "vertical_oscillation_cm": {
+        "min": 7.0,
+        "max": 7.5,
+        "ideal": 7.2,
+        "description": "Minimal bounce"
+      },
+      "vertical_ratio": {
+        "min": 7.0,
+        "max": 7.5,
+        "ideal": 7.2,
+        "description": "Very efficient movement"
+      },
+      "ground_contact_time_ms": {
+        "min": 240,
+        "max": 250,
+        "ideal": 245,
+        "description": "Short contact time"
+      },
+      "step_speed_loss_percent": {
+        "min": 4.0,
+        "max": 5.0,
+        "ideal": 4.5,
+        "description": "Minimal energy loss"
+      },
+      "hr_efficiency": {
+        "min": 78,
+        "max": 88,
+        "ideal": 83,
+        "description": "Optimized zone efficiency"
+      }
+    },
+    "training_focus": [
+      "Tempo runs (30-40 min)",
+      "Interval training (6-8 x 3-5min)",
+      "Speed work (fartlek, strides)",
+      "Strength: 2x/week (explosive)"
+    ],
+    "target_pace_min_km": 5.15,
+    "target_max_hr": 172
+  },
+  "balanced_runner": {
+    "name": "Balanced Runner",
+    "description": "Mix of speed and endurance, versatile training",
+    "archetype": "All-around, adaptable to different race distances",
+    "metrics": {
+      "cadence_spm": {
+        "min": 165,
+        "max": 175,
+        "ideal": 170,
+        "description": "Moderate-high cadence"
+      },
+      "vertical_oscillation_cm": {
+        "min": 7.5,
+        "max": 8.5,
+        "ideal": 8.0,
+        "description": "Good bounce control"
+      },
+      "vertical_ratio": {
+        "min": 7.5,
+        "max": 8.5,
+        "ideal": 8.0,
+        "description": "Balanced efficiency"
+      },
+      "ground_contact_time_ms": {
+        "min": 250,
+        "max": 270,
+        "ideal": 260,
+        "description": "Balanced contact"
+      },
+      "step_speed_loss_percent": {
+        "min": 5.0,
+        "max": 7.0,
+        "ideal": 6.0,
+        "description": "Moderate energy efficiency"
+      },
+      "hr_efficiency": {
+        "min": 76,
+        "max": 86,
+        "ideal": 81,
+        "description": "Balanced zone distribution"
+      }
+    },
+    "training_focus": [
+      "Mix of easy and tempo runs",
+      "Occasional speed work (8-10 x 2-3min)",
+      "Medium-long runs (45-75 min)",
+      "Strength: 2x/week (balanced)"
+    ],
+    "target_pace_min_km": 5.3,
+    "target_max_hr": 171
+  }
+}

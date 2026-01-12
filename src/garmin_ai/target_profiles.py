@@ -1,7 +1,7 @@
 """Target Profiles - Define experienced 50yo runner archetypes."""
 import json
 
-from .config import DATA_DIR
+from config import DATA_DIR, is_pipeline_mode
 
 TARGET_PROFILES = {
     "steady_runner": {
@@ -270,6 +270,19 @@ def print_comparison(current_metrics: dict) -> None:
     
     print("\n" + "=" * 80)
 
+def save_json_serializable(data, path):
+    """Save with numpy int64/float64 fix"""
+    import numpy as np
+    def convert(obj):
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        if isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        return obj
+    
+    serializable = {k: convert(v) if isinstance(v, dict) else v for k, v in data.items()}
+    with open(path, 'w') as f:
+        json.dump(serializable, f, indent=2)
 
 if __name__ == "__main__":
     """Test target profiles."""
@@ -299,6 +312,14 @@ if __name__ == "__main__":
         
         # Save profiles
         profiles_file = DATA_DIR / "target_profiles.json"
+        print(f"💾 SAVING TO: {profiles_file.absolute()}")
+
+        # Simple save (TARGET_PROFILES already pure Python dict)
         with open(profiles_file, 'w') as f:
-            json.dump(TARGET_PROFILES, f, indent=2)
-        print(f"\n💾 Profiles saved: {profiles_file}")
+            json.dump(TARGET_PROFILES, f, indent=2, ensure_ascii=False)
+
+        # VERIFY save
+        stat = profiles_file.stat()
+        print(f"✅ SAVED: {profiles_file.absolute()}")
+        print(f"✅ SIZE: {stat.st_size} bytes")
+        print(f"✅ PROFILES: {len(TARGET_PROFILES)}")

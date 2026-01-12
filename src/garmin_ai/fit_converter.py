@@ -5,8 +5,7 @@ from typing import Any, Dict, List
 
 import fitparse
 import pandas as pd
-
-from .config import CSV_DIR
+from config import CSV_DIR, is_pipeline_mode
 
 RUNNING_DYNAMICS_FIELDS = [
     "timestamp",
@@ -108,11 +107,14 @@ def convert_recent_fit_files(n_recent: int = 3) -> List[Dict[str, Any]]:
 
 if __name__ == "__main__":
     """Test converter with DEBUG output."""
+    if is_pipeline_mode():
+        print("🚫 Use pipeline.py instead")
+    exit(1)
     print("🚀 FIT → CSV Converter - DEBUG MODE")
     print("=" * 50)
     
     # DEBUG 1: Check garmin_client works
-    from .garmin_client import get_recent_fit_files
+    from garmin_client import get_recent_fit_files
     print("\n🔍 STEP 1: Finding FIT files...")
     fit_files = get_recent_fit_files(n_recent=3)
     print(f"   Found {len(fit_files)} FIT files")

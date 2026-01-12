@@ -1,0 +1,62 @@
+🚀 Garmin Activities Analyzer
+======================================================================
+📊 Loading: Activities.csv
+   ✅ Loaded 4 activities
+   Columns (40): ['Activity Type', 'Date', 'Favorite', 'Title', 'Distance', 'Calories', 'Time', 'Avg HR', 'Max HR', 'Aerobic TE', 'Avg Run Cadence', 'Max Run Cadence', 'Avg Pace', 'Best Pace', 'Total Ascent', 'Total Descent', 'Avg Stride Length', 'Avg Vertical Ratio', 'Avg Vertical Oscillation', 'Avg Step Speed Loss', 'Avg Step Speed Loss %', 'Avg Ground Contact Time', 'Avg GCT Balance', 'Avg GAP', 'Normalized Power® (NP®)', 'Training Stress Score®', 'Avg Power', 'Max Power', 'Steps', 'Body Battery Drain', 'Decompression', 'Best Lap Time', 'Number of Laps', 'Avg Resp', 'Min Resp', 'Max Resp', 'Moving Time', 'Elapsed Time', 'Min Elevation', 'Max Elevation']
+
+📊 RUNNING PROFILE ANALYSIS
+======================================================================
+
+📈 Overall Statistics (4 activities)
+----------------------------------------------------------------------
+  Total Distance: 30.7 km
+  Total Time: 3.1 hours
+  Avg Pace: 6.0 min/km
+
+🏃 Running Cadence
+----------------------------------------------------------------------
+  Avg: 167 spm
+  Max: 236 spm
+  Min: 160 spm
+  Range: 76 spm
+
+❤️  Heart Rate
+----------------------------------------------------------------------
+  Avg: 149 bpm
+  Max: 180 bpm
+  Zone Efficiency: 82.9% of max
+
+🏃 Running Dynamics (Forerunner 970 + HRM-600)
+----------------------------------------------------------------------
+  Avg Vertical Oscillation: 8.4 cm
+  Avg Vertical Ratio: 8.27%
+  Avg Ground Contact Time: 268 ms
+  Avg Step Speed Loss: 21.7 cm/s (7.67%)
+  Avg Stride Length: 0.99 m
+  Avg GCT Balance: 50.3% L / 49.7% R
+
+⚡ Performance Metrics
+----------------------------------------------------------------------
+  Avg Power: 289 watts
+  Total Aerobic TE: 18.8
+  Avg Aerobic TE per run: 4.7
+  Total Calories: 2190
+
+📋 Recent Activities
+----------------------------------------------------------------------
+  1. 2025-12-30 07:21:20
+     10.0km | 01:01:41 | HR 150 | Cadence 170
+     VO: 8.0cm | GCT: 265ms | SSL: 21.6cm/s
+  2. 2025-12-28 07:49:35
+     8.1km | 00:51:58 | HR 145 | Cadence 160
+     VO: 8.6cm | GCT: 274ms | SSL: 20.5cm/s
+  3. 2025-12-26 07:32:34
+     7.1km | 00:40:12 | HR 156 | Cadence 170
+     VO: 8.0cm | GCT: 267ms | SSL: 24.6cm/s
+  4. 2025-12-23 07:36:50
+     5.5km | 00:32:17 | HR 146 | Cadence 167
+     VO: 8.8cm | GCT: 267ms | SSL: 20.2cm/s
+🔍 DEBUG: running_profile types = {'avg_cadence': 'float', 'avg_hr': 'float', 'max_hr': 'float', 'avg_vertical_oscillation': 'float', 'avg_vertical_ratio': 'float', 'avg_ground_contact_time': 'float', 'avg_step_speed_loss': 'float', 'avg_step_speed_loss_pct': 'float', 'avg_stride_length': 'float', 'avg_gct_balance_left': 'float', 'avg_gct_balance_right': 'float', 'avg_pace_min_km': 'float', 'avg_power': 'float', 'total_aerobic_te': 'float', 'avg_aerobic_te': 'float'}
+🔍 DEBUG: sample values = [('avg_cadence', 166.75), ('avg_hr', 149.25), ('max_hr', 180.0)]
+✅ JSON serializable OK!
+✅ Saved data/running_profile.json

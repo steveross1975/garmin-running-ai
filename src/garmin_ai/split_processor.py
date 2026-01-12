@@ -2,8 +2,7 @@
 from pathlib import Path
 
 import pandas as pd
-
-from .config import DATA_DIR
+from config import DATA_DIR, is_pipeline_mode
 
 SPLITS_DIR = DATA_DIR / "splits"
 SPLITS_DIR.mkdir(exist_ok=True)
@@ -43,6 +42,9 @@ def analyze_splits(df: pd.DataFrame, activity_id: str) -> dict:
 
 if __name__ == "__main__":
     """Test splits processor."""
+    if is_pipeline_mode():
+        print("🚫 Use pipeline.py instead")
+    exit(1)
     print("🚀 Garmin Splits CSV Processor")
     print("=" * 50)
     
