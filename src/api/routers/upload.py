@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from fastapi import APIRouter, File, UploadFile
 
 from garmin_ai.config import DATA_DIR
