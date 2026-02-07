@@ -2,7 +2,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-app = FastAPI(title="Garmin Running AI API")
+from api.routers import analyze, injury, upload
+
+app = FastAPI(title="Garmin Running AI API") 
+app.include_router(upload.router) 
+app.include_router(analyze.router) 
+app.include_router(injury.router)
 
 class AnalyzeResponse(BaseModel):
     form_score: float
