@@ -1,6 +1,9 @@
+from pathlib import Path
+
 from fastapi import APIRouter, File, UploadFile
 
-from garmin_ai.config import DATA_DIR
+from api.utils.pipeline_runner import run_full_pipeline
+from garmin_ai.config import DATA_DIR as DATADIR
 
 router = APIRouter()
 
@@ -14,8 +17,9 @@ async def upload_files(
     Upload Garmin files and save them into DATADIR/csv and DATADIR/fit.
     """
 
-    csv_dir = DATA_DIR / "csv"
-    fit_dir = DATA_DIR / "fit"
+    # Ensure directories exist
+    csv_dir = DATADIR / "csv"
+    fit_dir = DATADIR / "fit"
     csv_dir.mkdir(parents=True, exist_ok=True)
     fit_dir.mkdir(parents=True, exist_ok=True)
 
@@ -34,4 +38,11 @@ async def upload_files(
     with open(fit_path, "wb") as f:
         f.write(await fit.read())
 
-    return {"status": "files uploaded"}
+    result = run_full_pipeline()
+    return {
+        "status": "uploaded",
+        "activities": str(activities_path),
+        "splits": str(splits_path),
+        "fit": str(fit_path),
+        "ai_tips": result
+    }
