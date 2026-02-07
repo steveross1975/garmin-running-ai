@@ -8,6 +8,11 @@ from config import DATA_DIR
 
 ACTIVITIES_CSV = DATA_DIR / "Activities.csv"
 
+def clean_numeric(series):
+    """Convert Garmin '--' and other non-numeric values to NaN, then float."""
+    return pd.to_numeric(series.replace(['--', '---', ''], np.nan), errors='coerce')
+
+
 def load_activities(csv_path: Path = ACTIVITIES_CSV) -> pd.DataFrame:
     """Load Garmin Activities.csv with all running metrics."""
     if not csv_path.exists():
@@ -72,7 +77,8 @@ def analyze_activities(df: pd.DataFrame) -> dict:
     )
     
     # Convert ALL pandas series to Python floats FIRST
-    def safe_mean(series):
+    def safe_mean(series): 
+        series = clean_numeric(series) 
         return float(series.mean()) if not series.empty else 0.0
     
     def safe_sum(series):
@@ -233,7 +239,9 @@ if __name__ == "__main__":
         print("❌ No Activities.csv found")
         print("📋 Copy your Garmin Activities.csv to data/Activities.csv")
         exit(1)
-    
+    for col in df.columns:
+        df[col] = clean_numeric(df[col])
+
     analysis = analyze_activities(df)
     print_analysis(analysis)
     running_profile = create_running_profile(analysis)

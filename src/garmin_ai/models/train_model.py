@@ -23,71 +23,123 @@ def load_training_data() -> pd.DataFrame:
     return df
 
 # fix_column_names() - BULLETPROOF VERSION
-def fix_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    """Convert snake_case → camelCase + ensure ALL features exist."""
-    print(f"🔍 Input columns: {list(df.columns)}")
+# def fix_column_names(df: pd.DataFrame) -> pd.DataFrame:
+#     """Convert snake_case → camelCase + ensure ALL features exist."""
+#     print(f"🔍 Input columns: {list(df.columns)}")
     
-    # Step 1: Rename existing columns
+#     # Step 1: Rename existing columns
+#     column_mapping = {
+#         'cadence_spm': 'cadencespm',
+#         'vertical_oscillation_cm': 'verticaloscillationcm',
+#         'ground_contact_time_ms': 'groundcontacttimems',
+#         'step_speed_loss_pct': 'stepspeedlosspct',
+#         'pace_min_km': 'paceminkm',
+#         'heart_rate_bpm': 'heartratebpm'  # If exists
+#     }
+    
+#     df = df.rename(columns=column_mapping).copy()
+#     print(f"📝 After rename: {list(df.columns)[:10]}...")
+    
+#     # Step 2: Ensure ALL 6 required features exist (fill/create as needed)
+#     feature_cols = ['cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 
+#                    'stepspeedlosspct', 'heartratebpm', 'paceminkm']
+    
+#     for col in feature_cols:
+#         if col not in df.columns:
+#             print(f"⚠️  Creating missing column: {col}")
+            
+#             if col == 'cadencespm':
+#                 df[col] = 170.0  # Elite default
+#             elif col == 'verticaloscillationcm':
+#                 df[col] = 7.5
+#             elif col == 'groundcontacttimems':
+#                 df[col] = 255.0
+#             elif col == 'stepspeedlosspct':
+#                 df[col] = 5.0
+#             elif col == 'paceminkm':
+#                 # Derive from existing distance/duration if possible
+#                 if 'distance_km' in df.columns and 'duration_min' in df.columns:
+#                     df[col] = df['duration_min'] / df['distance_km']
+#                 else:
+#                     df[col] = 5.30  # Elite pace
+#             elif col == 'heartratebpm':
+#                 # Smart generation from cadence + pace
+#                 cadence_mean = df.get('cadencespm', 170)
+#                 pace_mean = df.get('paceminkm', 5.3)
+#                 df[col] = 160 + (pace_mean - 5.0) * 20 - (cadence_mean - 170) * 0.3
+#                 df[col] = df[col].clip(140, 180)
+    
+#     # Step 3: Fill any NaNs with means
+#     for col in feature_cols:
+#         df[col] = df[col].fillna(df[col].mean())
+    
+#     print(f"✅ ALL features ready: {feature_cols}")
+#     print(f"   Ranges: cadence={df['cadencespm'].min():.0f}-{df['cadencespm'].max():.0f}")
+#     return df
+
+def fix_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize column names and ensure required metrics exist."""
     column_mapping = {
         'cadence_spm': 'cadencespm',
         'vertical_oscillation_cm': 'verticaloscillationcm',
         'ground_contact_time_ms': 'groundcontacttimems',
         'step_speed_loss_pct': 'stepspeedlosspct',
         'pace_min_km': 'paceminkm',
-        'heart_rate_bpm': 'heartratebpm'  # If exists
+        'heart_rate_bpm': 'heartratebpm',
     }
-    
-    df = df.rename(columns=column_mapping).copy()
-    print(f"📝 After rename: {list(df.columns)[:10]}...")
-    
-    # Step 2: Ensure ALL 6 required features exist (fill/create as needed)
-    feature_cols = ['cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 
-                   'stepspeedlosspct', 'heartratebpm', 'paceminkm']
-    
-    for col in feature_cols:
-        if col not in df.columns:
-            print(f"⚠️  Creating missing column: {col}")
-            
-            if col == 'cadencespm':
-                df[col] = 170.0  # Elite default
-            elif col == 'verticaloscillationcm':
-                df[col] = 7.5
-            elif col == 'groundcontacttimems':
-                df[col] = 255.0
-            elif col == 'stepspeedlosspct':
-                df[col] = 5.0
-            elif col == 'paceminkm':
-                # Derive from existing distance/duration if possible
-                if 'distance_km' in df.columns and 'duration_min' in df.columns:
-                    df[col] = df['duration_min'] / df['distance_km']
-                else:
-                    df[col] = 5.30  # Elite pace
-            elif col == 'heartratebpm':
-                # Smart generation from cadence + pace
-                cadence_mean = df.get('cadencespm', 170)
-                pace_mean = df.get('paceminkm', 5.3)
-                df[col] = 160 + (pace_mean - 5.0) * 20 - (cadence_mean - 170) * 0.3
-                df[col] = df[col].clip(140, 180)
-    
-    # Step 3: Fill any NaNs with means
-    for col in feature_cols:
-        df[col] = df[col].fillna(df[col].mean())
-    
-    print(f"✅ ALL features ready: {feature_cols}")
-    print(f"   Ranges: cadence={df['cadencespm'].min():.0f}-{df['cadencespm'].max():.0f}")
-    return df
+
+    # 1) Rename what we know
+    df_renamed = df.rename(columns=column_mapping).copy()
+
+    # 2) Ensure pace exists (paceminkm)
+    if 'paceminkm' not in df_renamed.columns:
+        if {'distance_km', 'duration_min'}.issubset(df_renamed.columns):
+            print("⚠️  Generating paceminkm from distance_km / duration_min")
+            # pace = minutes per km
+            df_renamed['paceminkm'] = (
+                df_renamed['duration_min'] / df_renamed['distance_km'].clip(lower=0.1)
+            )
+        else:
+            # Fallback constant if we really have nothing
+            print("⚠️  paceminkm missing and cannot be derived, using default 5.5")
+            df_renamed['paceminkm'] = 5.5
+
+    # 3) Ensure cadence exists (cadencespm)
+    if 'cadencespm' not in df_renamed.columns:
+        if 'cadence_spm' in df.columns:
+            df_renamed['cadencespm'] = df['cadence_spm']
+        else:
+            print("⚠️  cadencespm missing, using default 170")
+            df_renamed['cadencespm'] = 170.0
+
+    # 4) Ensure HR exists (heartratebpm)
+    if 'heartratebpm' not in df_renamed.columns:
+        print("⚠️  Generating heartratebpm from paceminkm / cadencespm")
+        hr = (
+            160
+            + (df_renamed['paceminkm'] - 5.0) * 20
+            - (df_renamed['cadencespm'] - 170) * 0.5
+        )
+        df_renamed['heartratebpm'] = hr.clip(140, 180)
+
+    print("✅ Columns fixed (sample):", list(df_renamed.columns)[:10])
+    return df_renamed
 
 
 # FIXED: prepare_features_target() - Broadcast error fix
 def prepare_features_target(df: pd.DataFrame) -> tuple:
     """Prepare ML-ready features and targets - FIXED broadcast error."""
-    df = fix_column_names(df)
+    # df = fix_column_names(df)
     
-    feature_cols = [
-        'cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 
-        'stepspeedlosspct', 'heartratebpm', 'paceminkm'
-    ]
-    
+    # feature_cols = [
+    #     'cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 
+    #     'stepspeedlosspct', 'heartratebpm', 'paceminkm'
+    # ]
+
+    df = fix_column_names(df) 
+    feature_cols = [ 'cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 'stepspeedlosspct', 'heartratebpm', 'paceminkm' ] 
+    df[feature_cols] = df[feature_cols].fillna(df[feature_cols].mean())
+
     # Elite targets (repeat for all rows)
     elite_targets_dict = {
         'cadencespm': 175.0,

@@ -53,46 +53,79 @@ def get_latest_activity_data() -> tuple:
     return df, latest
 
 def predict_new_run(df: pd.DataFrame, latest_row: pd.Series, model, scaler, feature_cols: list) -> dict:
-    """Predict form score + gaps."""
-    # ✅ SAFE PARSING with pace fix
+    """Predict form score + distance-aware gaps."""
+    # ✅ SAFE PARSING (unchanged)
     profile = {
         'avgcadence': safe_float(latest_row.get('Avg Run Cadence', 160)),
         'avgverticaloscillation': safe_float(latest_row.get('Avg Vertical Oscillation', 8.0)),
         'avggroundcontacttime': safe_float(latest_row.get('Avg Ground Contact Time', 260)),
         'avgstepspeedlosspct': safe_float(latest_row.get('Avg Step Speed Loss %', 5.5)),
         'avghr': safe_float(latest_row.get('Avg HR', 155)),
-        'avgpaceminkm': parse_garmin_pace(latest_row.get('Avg Pace', '5:30'))  # ✅ Fixed!
+        'avgpaceminkm': parse_garmin_pace(latest_row.get('Avg Pace', '5:30'))
     }
     
+    # ✅ EXACT TRAINING ORDER (6 features)
     features = np.array([
-        profile['avgcadence'], profile['avgverticaloscillation'],
-        profile['avggroundcontacttime'], profile['avgstepspeedlosspct'],
-        profile['avghr'], profile['avgpaceminkm']
+        profile['avgcadence'],           # 0: cadencespm
+        profile['avgverticaloscillation'], # 1: verticaloscillationcm
+        profile['avggroundcontacttime'],   # 2: groundcontacttimems
+        profile['avgstepspeedlosspct'],    # 3: stepspeedlosspct
+        profile['avghr'],                  # 4: heartratebpm
+        profile['avgpaceminkm']            # 5: paceminkm
     ])
     
     # Predict
     features_scaled = scaler.transform(features.reshape(1, -1))
     form_score = model.predict(features_scaled)[0]
     
-    # Elite gaps
-    # In predict_new_run(), elite_targets:
-    elite_targets = {
-        'cadencespm': 175,
-        'verticaloscillationcm': 7.2, 
-        'groundcontacttimems': 245,
-        'stepspeedlosspct': 4.5,
-        'paceminkm': 5.15  # ✅ Elite 50yo marathon pace
-    }
-
+    # ✅ DISTANCE-AWARE ELITE TARGETS (5K→Marathon)
+    distance_km = safe_float(latest_row.get('Distance', 10))
     
+    # Base elite targets (marathon training default)
+    elite_targets = {
+        'cadencespm': 175.0,
+        'verticaloscillationcm': 7.2,
+        'groundcontacttimems': 245.0,
+        'stepspeedlosspct': 4.5,
+        'heartratebpm': 155.0,
+        'paceminkm': 5.05  # Mara training
+    }
+    
+    # ✅ AUTO-ADJUST by distance!
+    if distance_km <= 7:  # 5K
+        elite_targets.update({
+            'paceminkm': 4.20,  # 5K training pace [web:25]
+            'cadencespm': 180.0,
+            'heartratebpm': 165.0
+        })
+        pace_category = "5K Training"
+    elif distance_km <= 15:  # 10K
+        elite_targets.update({
+            'paceminkm': 4.35,  # 10K training [web:9]
+            'cadencespm': 178.0,
+            'heartratebpm': 162.0
+        })
+        pace_category = "10K Training" 
+    elif distance_km <= 25:  # Half
+        elite_targets.update({
+            'paceminkm': 4.55,  # Half training
+            'cadencespm': 175.0,
+            'heartratebpm': 158.0
+        })
+        pace_category = "Half Training"
+    else:  # Marathon+
+        pace_category = "Marathon Training"
+    
+    # ✅ 6 GAP CALCULATIONS (exact feature order!)
     gaps = {}
     col_map = ['cadencespm', 'verticaloscillationcm', 'groundcontacttimems', 
-               'stepspeedlosspct', 'paceminkm']
+               'stepspeedlosspct', 'heartratebpm', 'paceminkm']  # ✅ 6 items!
+    
     for i, col in enumerate(col_map):
         gaps[col] = {
-            'current': features[i],
+            'current': float(features[i]),
             'target': elite_targets[col],
-            'gap': features[i] - elite_targets[col]
+            'gap': float(features[i] - elite_targets[col])
         }
     
     return {
@@ -100,7 +133,8 @@ def predict_new_run(df: pd.DataFrame, latest_row: pd.Series, model, scaler, feat
         'profile': profile,
         'gaps': gaps,
         'priority_gaps': sorted(gaps.items(), key=lambda x: abs(x[1]['gap']), reverse=True)[:3],
-        'activity_date': str(latest_row.get('Date', 'Unknown'))
+        'activity_date': str(latest_row.get('Date', 'Unknown')),
+        'distance_category': f"{pace_category} ({distance_km:.1f}km)"  # Bonus!
     }
 
 def safe_float(value):
